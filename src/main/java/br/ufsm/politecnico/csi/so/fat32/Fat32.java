@@ -86,6 +86,20 @@ public class Fat32 implements FileSystem {
 
     @Override
     public byte[] read(String fileName, int offset, int limit) {
+        /*
+        1- buscar o arquivo no diretorio pelo nome.
+        
+        byte[] arquivo =  new byte[diretorio.tamanho];
+
+        numeroBloco = diretorio.blocoInicial
+         do{
+                leio o bloco
+                grava o bloco o arquivo[]
+                numeroBloco = fat[numBloco]
+
+        }while (numeroBloco > 0);
+
+        */
         return new byte[0];
     }
 
@@ -96,7 +110,15 @@ public class Fat32 implements FileSystem {
 
     @Override
     public int freeSpace() {
-        return 0;
+        
+         int livres = 0;
+
+        for(int i : fat){
+            if (i  ==  0){
+                livres++;
+            }
+        }
+        return livres * Disco.TamanhoBloco;
     }
 
     private List<EntradaDiretorio> diretorio = new ArrayList<>();
