@@ -14,12 +14,14 @@ public class Disco {
     public Disco(){}
 
     public boolean init() throws IOException {
-        File f = new File ("disco.dat");
+        File f = new File("disco.dat");
         boolean exists = f.exists();
 
-        if(!exists){
-            raf = new RandomAccessFile(f,"rws");
-            raf.setLength(NumeroBlocos*TamanhoBloco);
+        // Abra o RAF em qualquer caso
+        raf = new RandomAccessFile(f, "rws");
+
+        if (!exists) {
+            raf.setLength((long) NumeroBlocos * TamanhoBloco);
         }
         return exists;
     }
@@ -34,15 +36,17 @@ public class Disco {
         return read;
     }
 
-    public void write(int numBlocos, byte [] data) throws IOException {
-
-        if(numBlocos < 0 || numBlocos > NumeroBlocos ) {
-            throw new IllegalArgumentException("Num de blocos deve ser entre 0 e "+(NumeroBlocos - 1));
+    public void write(int numBlocos, byte[] data) throws IOException {
+        if (numBlocos < 0 || numBlocos > NumeroBlocos) {
+            throw new IllegalArgumentException("Num de blocos deve ser entre 0 e " + (NumeroBlocos - 1));
         }
 
-        if(data == null || data.length > TamanhoBloco){
-            throw new IllegalArgumentException("Num de blocos deve ser entre 0 e "+(NumeroBlocos - 1));
+        if (data == null || data.length > TamanhoBloco) {
+            throw new IllegalArgumentException("Data inválida para gravação");
         }
+
+        raf.seek(numBlocos * TamanhoBloco);
+        raf.write(data);
     }
 
 
