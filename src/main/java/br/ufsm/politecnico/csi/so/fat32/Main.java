@@ -4,6 +4,8 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+
+        //new java.io.File("disco.dat").delete();
         FileSystem fs = new Fat32();
         Scanner sc = new Scanner(System.in);
 

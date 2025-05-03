@@ -307,36 +307,50 @@ public class Fat32 implements FileSystem {
 
     @Override
     public void remove(String fileName) {
-        // recarrega FAT e diretório
-        leFat();
-        leDiretorio();
+        try {
+            // 0) Recarrega FAT e diretório
+            leFat();
+            leDiretorio();
 
-        // busca entrada
-        EntradaDiretorio entrada = null;
-        for (EntradaDiretorio e : diretorio) {
-            if (e.fileName.equals(fileName)) {
-                entrada = e;
-                break;
+            // 1) Localiza a entrada a remover
+            EntradaDiretorio entrada = null;
+            for (EntradaDiretorio e : diretorio) {
+                if (e.fileName.equals(fileName)) {
+                    entrada = e;
+                    break;
+                }
             }
-        }
-        if (entrada == null) {
-            throw new RuntimeException("Arquivo não encontrado: " + fileName);
-        }
+            if (entrada == null) {
+                throw new RuntimeException("Arquivo não encontrado: " + fileName);
+            }
 
-        // libera todos os blocos encadeados
-        int bloco = entrada.blocoInicial;
-        while (bloco > 0) {
-            int proximo = fat[bloco];
-            fat[bloco] = 0;
-            bloco = proximo;
+            // 2) Percorre a cadeia de blocos e limpa o conteúdo antes de liberar
+            int bloco = entrada.blocoInicial;
+            while (bloco > 0) {
+                int proximo = fat[bloco];
+
+                // Limpa fisicamente o bloco (grava zeros)
+                byte[] vazio = new byte[Disco.TamanhoBloco];
+                disco.write(bloco, vazio);
+
+                // Marca bloco como livre na FAT
+                fat[bloco] = 0;
+
+                bloco = proximo;
+            }
+
+            // 3) Remove a entrada do diretório em memória
+            diretorio.remove(entrada);
+
+            // 4) Persiste FAT e diretório zerados
+            gravaFat();
+            gravaDiretorio();
+
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
-
-        // remove do diretório e persiste
-        diretorio.remove(entrada);
-        gravaFat();
-        gravaDiretorio();
-
     }
+
 
 
     @Override
